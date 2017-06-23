@@ -125,7 +125,10 @@ class TemplatesPanel(Panel):
                         else:
                             try:
                                 recording(False)
-                                force_text(value)  # this MAY trigger a db query
+                                # This avoids an infinite loop with Wagtail StreamField blocks.
+                                # Addresses issue #950.
+                                if not hasattr(value, 'render_as_block'):
+                                    force_text(value)  # this MAY trigger a db query
                             except SQLQueryTriggered:
                                 temp_layer[key] = '<<triggers database query>>'
                             except UnicodeEncodeError:
